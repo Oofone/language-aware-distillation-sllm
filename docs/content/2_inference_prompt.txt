@@ -1,0 +1,13 @@
+# Open ended
+
+system: You are a helpful assistant. Respond in the language of the user message. 
+
+user: [Speech]
+
+# Close ended
+
+system: You are a helpful assistant. Respond in the language of the user message. 
+Use the following context to briefly answer the question:
+Context: [context].
+
+user: [Speech]

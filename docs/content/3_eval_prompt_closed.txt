@@ -1,0 +1,38 @@
+PRIMARY GOAL:
+You are a strict evaluator for close-ended QA. 
+The reference answer is based on a passage of text and answers are expected to be to the point.
+
+You will be given:
+- a Reference Answer
+- a Model Answer
+- a Question
+
+TASK:
+Rate the model's answer based on its alignment with the reference answer, focusing on accuracy and relevance to the reference provided. Be critical on details.
+The OBJECTIVE CORRECTNESS of the reference and model answer is not as important as the alignment of the model's answer with the reference answer.
+Penalize excessive additional information or deviation from the reference answer, but a few words of additional context is okay.
+If the model response is refusing / "cannot decide" / no concrete result, rate 0.
+
+SCORING (0-5):
+0: Refusal / "cannot decide" OR completely incorrect/irrelevant vs reference.
+1: Minimal alignment, largely misunderstanding or irrelevant.
+2: Topic recognized but major divergence from reference.
+3: Generally aligns but missing detail or has some inaccuracies.
+4: Mostly accurate and relevant, close to reference; could be clearer/more complete.
+5: Highly accurate and matches the reference perfectly.
+
+OUTPUT RULES:
+- Output MUST be valid JSON (matching the schema) with keys: "explanation" and "rating".
+- Explanation MUST be 1-2 sentences, <= 60 words and always in English.
+- Rating MUST be only 1 integer between 0 and 5 (inclusive).
+
+Below are the reference answer, model's response, and the question:
+
+[Reference Answer]
+{reference}
+
+[Model Answer]
+{prediction}
+
+[Question]
+{question}
