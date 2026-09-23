@@ -1,0 +1,654 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Supplementary Material &mdash; Language-Aware Distillation for Multilingual Speech LLMs</title>
+  <style>
+    :root{
+      --bg:#fff; --fg:#111; --muted:#666; --border:#e6e6e6;
+      --codebg:#f7f7f7; --link:#1a73e8; --tocbg:rgba(255,255,255,.94);
+      --shadow:0 10px 30px rgba(0,0,0,.08); --r:12px;
+      --mono: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+      --sans: ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+    }
+    html,body{height:100%}
+    body{margin:0;font-family:var(--sans);color:var(--fg);background:var(--bg);line-height:1.55}
+
+    .wrap{max-width:1050px;margin:0 auto;padding:28px 18px 60px}
+    header{margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+    header h1{margin:0 0 6px;font-size:28px;letter-spacing:-.02em;line-height:1.15}
+    header h1 span{display:block}
+    header h1 .subtitle{font-weight:800}
+    header h1 .title{font-weight:600}
+    header p{margin:0;color:var(--muted);max-width:90ch}
+    .small{font-size:13px;color:var(--muted)}
+    a{color:var(--link);text-decoration:none}
+    a:hover{text-decoration:underline}
+
+    main h2{margin-top:34px;margin-bottom:10px;font-size:22px;letter-spacing:-.01em;padding-top:10px;border-top:1px solid var(--border)}
+    main h3{margin-top:18px;margin-bottom:8px;font-size:18px}
+    main h4{margin-top:14px;margin-bottom:6px;font-size:15px;color:#222}
+    main p, main ul{max-width:92ch}
+    .inline{background:var(--codebg);border:1px solid var(--border);border-radius:8px;padding:1px 6px;font-family:var(--mono);font-size:.95em}
+
+    pre{background:var(--codebg);border:1px solid var(--border);border-radius:var(--r);
+        padding:14px;overflow:auto;font-family:var(--mono);font-size:13px;line-height:1.45;max-width:100%}
+    code{font-family:var(--mono)}
+
+    .toc{
+      position:fixed;top:18px;right:18px;width:340px;max-height:calc(100vh - 36px);overflow:auto;
+      background:var(--tocbg);border:1px solid var(--border);border-radius:var(--r);
+      box-shadow:var(--shadow);padding:10px 10px 12px;backdrop-filter:blur(6px)
+    }
+    .toc h2{font-size:13px;margin:6px 10px 10px;color:var(--muted);border:none;padding:0;letter-spacing:.02em}
+    .toc ul{list-style:none;padding:0;margin:0}
+    .toc li{margin:0}
+    .toc a{
+      display:flex;gap:8px;align-items:flex-start;
+      padding:7px 10px;border-radius:10px;color:var(--fg)
+    }
+    .toc a:hover{background:#f2f6ff;text-decoration:none}
+    .toc a.active{background:#e8f0fe}
+    .toc .txt{flex:1}
+
+    .toc a.lvl2{font-weight:700;font-size:13.5px}
+    .toc a.lvl3{font-weight:600;font-size:12.8px;padding-left:20px}
+    .toc a.lvl4{font-weight:500;font-size:12.2px;padding-left:34px;color:#222}
+
+    @media (min-width:1180px){.wrap{padding-right:390px}}
+    @media (max-width:900px){
+      .toc{position:static;width:auto;max-height:none;margin:0 0 18px}
+      .wrap{padding-right:18px}
+    }
+
+    .sec-meta{display:flex;gap:12px;align-items:baseline;justify-content:space-between;flex-wrap:wrap}
+    .sec-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      border:1px solid var(--border);border-radius:999px;padding:6px 10px;background:#fff;font-size:13px
+    }
+    .btn{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:8px 10px;border:1px solid var(--border);border-radius:10px;background:#fff;
+      cursor:pointer;font-size:13px
+    }
+    .btn:hover{background:#f6f6f6}
+
+    .note{
+      background:#fffbe6;border:1px solid #ffe58f;border-radius:var(--r);
+      padding:12px 14px;max-width:92ch;margin:12px 0
+    }
+
+    .audio-grid{display:grid;grid-template-columns:1fr;gap:10px;max-width:92ch}
+    .audio-item{border:1px solid var(--border);border-radius:var(--r);padding:12px;background:#fff}
+    .audio-item .label{font-weight:700;margin-bottom:6px}
+    audio{width:100%}
+    table.paper-table{
+      border-collapse: collapse;
+      width: auto;           
+      max-width: 92ch;
+      margin: 10px 0 14px;
+      font-size: 14px;
+    }
+    table.paper-table th,
+    table.paper-table td{
+      padding: 6px 10px;
+      text-align: left;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    table.paper-table thead tr:first-child th{
+      border-top: 2px solid #111;
+    }
+    table.paper-table thead tr:last-child th{
+      border-bottom: 1.5px solid #111;
+    }
+    table.paper-table tbody tr.total-row td{
+      border-top: 1.5px solid #111;
+      border-bottom: 2px solid #111;
+      font-weight: 700;
+    }
+
+    table.paper-table td.num,
+    table.paper-table th.num{
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .tbl-caption{
+      font-size: 13px;
+      color: #666;
+      margin-top: 6px;
+      max-width: 92ch;
+    }
+
+    .refs { max-width: 92ch; padding-left: 22px; }
+    .refs li { margin: 10px 0; }
+    .refs a { margin-left: 6px; }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header>
+      <h1 id="page-title">
+        <span class="title">Language-Aware Distillation for Multilingual Instruction-Following Speech
+LLMs with ASR-Only Supervision</span>
+        </br>
+        <span class="subtitle">Supplementary Material</span>
+      </h1>
+      <p class="small">
+        All content is visible from this HTML. Raw files can be opened via links.
+      </p>
+      <p class="small" style="margin-top:8px">
+        &larr; <a href="index.html">Back to the project page</a>
+      </p>
+    </header>
+
+    <nav class="toc" aria-label="Table of contents">
+      <h2>Contents</h2>
+      <ul id="toc"></ul>
+      <div style="margin-top:10px; padding:0 10px;">
+        <button class="btn" id="expandAll" type="button">Expand all</button>
+        <button class="btn" id="collapseAll" type="button" style="margin-left:8px;">Collapse all</button>
+      </div>
+    </nav>
+
+    <main id="content">
+
+      <!-- ========================================================= -->
+      <section data-collapsed="true">
+        <div class="sec-meta">
+          <h2>1. Dev/Validation Split Information</h2>
+          <div class="sec-actions">
+            <button class="btn sec-toggle" type="button" aria-expanded="false">Expand</button>
+          </div>
+        </div>
+
+        <p>Training and Evaluation data is explained and summarized in the main paper.</br>All the data splits (train, dev, test) are independent and do not contain shared samples.</p>
+
+      <table class="paper-table" aria-label="Training data summary">
+        <thead>
+          <tr>
+            <th>Dataset</th>
+            <th>Language</th>
+            <th class="num">Hours</th>
+            <th class="num">#Samples</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>CV24&nbsp;[1]</td>
+            <td>English</td>
+            <td class="num">27</td>
+            <td class="num">16.3K</td>
+          </tr>
+          <tr>
+            <td>CV24&nbsp;[1]</td>
+            <td>Vietnamese</td>
+            <td class="num">1</td>
+            <td class="num">1.0K</td>
+          </tr>
+          <tr>
+            <td>CV24&nbsp;[1]</td>
+            <td>Indonesian</td>
+            <td class="num">4</td>
+            <td class="num">3.4K</td>
+          </tr>
+          <tr>
+            <td>CV24&nbsp;[1]</td>
+            <td>Chinese</td>
+            <td class="num">16</td>
+            <td class="num">10.6K</td>
+          </tr>
+          <tr>
+            <td>CV24&nbsp;[1]</td>
+            <td>Spanish</td>
+            <td class="num">27</td>
+            <td class="num">15.9K</td>
+          </tr>
+          <tr>
+            <td>CV24&nbsp;[1]</td>
+            <td>German</td>
+            <td class="num">28</td>
+            <td class="num">16.2K</td>
+          </tr>
+          <tr class="total-row">
+            <td colspan="2">Total</td>
+            <td class="num">103</td>
+            <td class="num">63.4K</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="tbl-caption">
+        Table 1: Validation data composition by dataset and language.
+      </div>
+      <p> We use CommonVoice24 [1] dev data for all languages to keep the validation pipeline straightforward.</p>
+      </section>
+
+      <!-- ========================================================= -->
+      <section data-collapsed="true">
+        <div class="sec-meta">
+          <h2>2. LLM Prompting and Generation Config</h2>
+          <div class="sec-actions">
+            <button class="btn sec-toggle" type="button" aria-expanded="false">Collapse</button>
+            <span class="pill">Raw:
+              <a href="content/2_inference_prompt.txt" target="_blank" rel="noopener">content/2_inference_prompt.txt</a>
+            </span>
+          </div>
+        </div>
+
+        <h3>2.1 Open-ended Instruction Following Prompt</h3>
+        <pre><code>
+system: You are a helpful assistant. Respond in the language of the user message. 
+
+user: [Speech]
+        </code></pre>
+
+        <h3>2.2 Close-ended QA Prompt</h3>
+        <pre><code>
+system: You are a helpful assistant. Respond in the language of the user message. 
+Use the following context to briefly answer the question:
+Context: [context].
+
+user: [Speech]
+        </code></pre>
+        <p>To ensure a fair comparison, we use the <b>same</b> text instruction "Use the following context to briefly answer the question" for evaluating baseline models as well.</p>
+
+        <h3>2.3 Generation/Decoding Config</h3>
+        <p>To keep results reproducible, we do not use sampling when decoding the LLM responses.</p>
+        <pre><code>
+do_sample: False
+max_new_tokens: 256
+repetition_penalty = 1.0
+length_penalty = 1.0
+        </code></pre>
+        <p>For all external baseline models we use the default model generation configuration for inference.</p>
+      </section>
+
+      <!-- ========================================================= -->
+      <section data-collapsed="true">
+        <div class="sec-meta">
+          <h2>3. Judging Prompts for Evaluation with MaJ</h2>
+          <div class="sec-actions">
+            <button class="btn sec-toggle" type="button" aria-expanded="false">Collapse</button>
+            <span class="pill">Raw:
+              <a href="content/3_eval_prompt_closed.txt" target="_blank" rel="noopener">content/3_eval_prompt_closed.txt</a>
+            </span>
+            <span class="pill">Raw:
+              <a href="content/3_eval_prompt_open.txt" target="_blank" rel="noopener">content/3_eval_prompt_open.txt</a>
+            </span>
+          </div>
+        </div>
+        <p>We follow a similar judging prompt structure to URO-Bench[2]</p>
+        <h3>3.1 Open-ended (MaJ / GPT-4.1)</h3>
+
+        <pre><code>
+PRIMARY GOAL:
+You are a strict but fair evaluator of the performance of several models in the speech interaction scenario.
+The models will receive a speech input from the user, which they need to understand and respond to with a text output.
+Your task is to rate the model’s responses based on the provided user input transcription [Instruction] and the model’s output transcription [Response].
+
+SCORING (0-5):
+Please evaluate the response on a scale of 1 to 5:
+1: The response is largely irrelevant, incorrect, or fails to address the user’s query. It may be off-topic or provide incorrect information.
+2: The response is somewhat relevant but lacks accuracy or completeness. It may only partially answer the user’s question or include extraneous information.
+3: The response is relevant and mostly accurate, but it may lack conciseness or include unnecessary details that don’t contribute to the main point.
+4: The response is relevant, accurate, and concise, providing a clear answer to the user’s question without unnecessary elaboration.
+5: The response is exceptionally relevant, accurate, and to the point. It directly addresses the user’s query in a highly effective and efficient manner, providing exactly the information needed.
+
+OUTPUT RULES:
+- Output MUST be valid JSON (matching the schema) with keys: "explanation" and "rating".
+- Explanation MUST be 1-2 sentences, <= 60 words and always in English.
+- Rating MUST be one integer between 0 and 5 (inclusive).
+
+Below are the transcription of user’s instruction and models’ response:
+
+### [Instruction]
+{question}
+
+### [Response]
+{prediction}
+        </code></pre>
+
+        <h3>3.2 Close-ended (MaJ / GPT-4.1)</h3>
+        <pre><code>
+PRIMARY GOAL:
+You are a strict evaluator for close-ended QA. 
+The reference answer is based on a passage of text and answers are expected to be to the point.
+
+You will be given:
+- a Reference Answer
+- a Model Answer
+- a Question
+
+TASK:
+Rate the model's answer based on its alignment with the reference answer, focusing on accuracy and relevance to the reference provided. Be critical on details.
+The OBJECTIVE CORRECTNESS of the reference and model answer is not as important as the alignment of the model's answer with the reference answer.
+Penalize excessive additional information or deviation from the reference answer, but a few words of additional context is okay.
+If the model response is refusing / "cannot decide" / no concrete result, rate 0.
+
+SCORING (0-5):
+0: Refusal / "cannot decide" OR completely incorrect/irrelevant vs reference.
+1: Minimal alignment, largely misunderstanding or irrelevant.
+2: Topic recognized but major divergence from reference.
+3: Generally aligns but missing detail or has some inaccuracies.
+4: Mostly accurate and relevant, close to reference; could be clearer/more complete.
+5: Highly accurate and matches the reference perfectly.
+
+OUTPUT RULES:
+- Output MUST be valid JSON (matching the schema) with keys: "explanation" and "rating".
+- Explanation MUST be 1-2 sentences, <= 60 words and always in English.
+- Rating MUST be only 1 integer between 0 and 5 (inclusive).
+
+Below are the reference answer, model's response, and the question:
+
+[Reference Answer]
+{reference}
+
+[Model Answer]
+{prediction}
+
+[Question]
+{question}
+        </code></pre>
+      </section>
+
+      <!-- ========================================================= -->
+      <section data-collapsed="true">
+        <div class="sec-meta">
+          <h2>4. Inference Samples</h2>
+          <div class="sec-actions">
+            <button class="btn sec-toggle" type="button" aria-expanded="false">Expand</button>
+          </div>
+        </div>
+
+        <h3>4.1 Audio-MLQA and Close-Ended Evaluation (QA)</h3>
+        <p>Audio-MLQA is derived from the text version of MLQA [3]. We synthesize the audio using state-of-the-art TTS.</p>
+        <div class="audio-grid">
+          <div class="audio-item">
+            <div class="label">Sample 1 (Vietnamese)</div>
+            <audio controls preload="none">
+              <source src="audio/4_vi_sample_closed.mp3" type="audio/mpeg" />
+              Your browser does not support the audio element.
+            </audio>
+            <div class="small">Raw: <a href="audio/4_vi_sample_closed.mp3" target="_blank" rel="noopener">audio/4_vi_sample_closed.mp3</a>
+              <p class="small"><b>Context</b>: Thành phố Miêu Lật tiếng Trung:苗栗市, Bính âm:Miáolì Shì, Pe̍h-ōe-jī:Biâu-le̍k-chhī) là huyện lỵ của Huyện Miêu Lật, Đài Loan. Từ Miêu Lậtlà kết hợp của hai từ trong tiếng Khách Gia là mèo (貓) và thành phố (裡), được phát âm gần như là Pali (Bari) trong các ngôn ngữ của Thổ dân Đài Loan. Thành phố có tỷ lệ người Khách Gia cao nhất tại Đài Loan. Năm 2009, dân số thành phố là 90.209 người trên tổng diện tích là 37,8878 km².</p>
+              <p class="small"><b>Question (Audio)</b>: Thành phố Miaoli nằm ở quốc gia nào?</br><b>Ground-Truth Answer</b>: Đài Loan</br><b>Model Prediction</b>: Thành phố Miêu Lật (Miaoli) nằm ở Đài Loan.</p>
+            </div>
+          </div>
+          <div class="audio-item">
+            <div class="label">Sample 2 (German)</div>
+            <audio controls preload="none">
+              <source src="audio/4_de_sample_closed.mp3" type="audio/mpeg" />
+              Your browser does not support the audio element.
+            </audio>
+            <div class="small">Raw: <a href="audio/4_de_sample_closed.mp3" target="_blank" rel="noopener">audio/4_de_sample_closed.mp3</a>
+              <p class="small"><b>Context</b>: Miaoli (chinesisch 苗栗市, Pinyin Miáolì Shì) ist eine Stadt mit knapp 90.000 Einwohnern in der Republik China auf Taiwan. Sie ist Hauptstadt des Landkreises Miaoli.</p>
+              <p class="small"><b>Question (Audio)</b>: In welchem Land befindet sich Miaoli City?</br><b>Ground-Truth Answer</b>: Taiwan</br><b>Model Prediction</b>: Miaoli (苗栗市) befindet sich in der Republik China auf Taiwan.</p>
+            </div>
+          </div>
+          <div class="audio-item">
+            <div class="label">Sample 3 (Spanish)</div>
+            <audio controls preload="none">
+              <source src="audio/4_es_sample_closed.mp3" type="audio/mpeg" />
+              Your browser does not support the audio element.
+            </audio>
+            <div class="small">Raw: <a href="audio/4_es_sample_closed.mp3" target="_blank" rel="noopener">audio/4_es_sample_closed.mp3</a>
+              <p class="small"><b>Context</b>: Miaoli (mandarín Pīnyīn: Miáolì Shì; Hakka PFS: Mèu-li̍t-sṳ; Hokkien POJ: Biâu-le̍k-chhī o Miâu-le̍k-chhī) es una ciudad-condado y sede de condado del condado de Miaoli, Taiwán. Su nombre Miaoli fue acuñado utilizando dos palabras Hakka, gato (貓) y ciudad (裡), el cual fonéticamente aproximado Pali (Bari) del Taokas lengua. Miaoli tiene un porcentaje relativamente alto de personas del pueblo Hakka. Tenía el segundo precio residencial más alto y el precio comercial más alto para terrenos en el condado de Miaoli a partir de 2004, a NT$ 28,601 por metro cuadrado y NT$ 63,317 por metro cuadrado, respectivamente.</p>
+              <p class="small"><b>Question (Audio)</b>: ¿En qué país se encuentra la ciudad de Miaoli?</br><b>Ground-Truth Answer</b>: Taiwán</br><b>Model Prediction</b>: La ciudad de Miaoli se encuentra en Taiwán.</p>
+            </div>
+          </div>
+        </div>
+        <p>All samples are generated at 44.1KHz, and the samples provided here are at the original sampling rate.</br>
+        The audio samples are down-sampled to 16KHz before inference as the Whisper Encoder is trained at 16KHz.</p>
+
+        <h3>4.2 Open-Ended Evaluation</h3>
+        <div class="audio-grid">
+          <p>English samples are obtained from the AudioBench [4] dataset. Indonesian samples are translated from AudioBench by a native speaker, and synthesized using state-of-the-art TTS system. Chinese samples are obtained from URO-Bench [2].</p>
+          <div class="audio-item">
+            <div class="label">Sample 1 (English)</div>
+            <audio controls preload="none">
+              <source src="audio/4_en_hermes_bad_open.wav" type="audio/wav" />
+              Your browser does not support the audio element.
+            </audio>
+            <div class="small">Raw: <a href="audio/4_en_hermes_bad_open.wav" target="_blank" rel="noopener">audio/4_en_hermes_bad_open.wav</a>
+              <p class="small"><b>Question (Audio)</b>: Suppose in a certain market, the probability that a customer buys a product is 0.6 and the probability that the customer buys another product is 0.4. What is the probability that the customer buys both products?</br><b>Model Prediction</b>: 
+                <pre><code>
+To find the probability that a customer buys both products, we need to multiply the individual probabilities since these are independent events.
+
+Given:
+- Probability of buying Product A = 0.06
+- Probability of buying Product B = 0.04
+
+Probability of buying both products = 0.06 × 0.04 = 0.0024
+
+So, the probability that a customer buys both products is 0.0024 or 0.24%.
+                </code></pre></p>
+              <p><b>MaJ Score: </b>2.0</br><b>MaJ Explanation:</b>The response incorrectly uses 0.06 and 0.04 instead of the given probabilities 0.6 and 0.4, leading to a wrong answer. The explanation of independence is correct, but the calculation is based on incorrect values.</p>
+            </div>
+          </div>
+          <div class="audio-item">
+            <div class="label">Sample 2 (English)</div>
+            <audio controls preload="none">
+              <source src="audio/4_en_hermes_good_open.wav" type="audio/wav" />
+              Your browser does not support the audio element.
+            </audio>
+            <div class="small">Raw: <a href="audio/4_en_hermes_good_open.wav" target="_blank" rel="noopener">audio/4_en_hermes_good_open.wav</a>
+              <p class="small"><b>Question (Audio)</b>: What is the probability of rolling a 4 on a fair dice?</br><b>Model Prediction</b>: 
+                <pre><code style="overflow-x: auto;">
+The probability of rolling a four on a fair six-sided die is 1/6, or approximately 16.67%.
+This is because there is only one favorable outcome (rolling a 4) out of six possible outcomes (rolling 1, 2, 3, 4, 5, or 6).
+                </code></pre></p>
+              <p><b>MaJ Score: </b>5.0</br><b>MaJ Explanation:</b>The response is accurate, concise, and clearly explains the probability calculation for rolling a 4 on a fair die.</p>
+            </div>
+          </div>
+          <div class="audio-item">
+            <div class="label">Sample 3 (Indonesian)</div>
+            <audio controls preload="none">
+              <source src="audio/4_id_alpaca_open.mp3" type="audio/wav" />
+              Your browser does not support the audio element.
+            </audio>
+            <div class="small">Raw: <a href="audio/4_id_alpaca_open.mp3" target="_blank" rel="noopener">audio/4_id_alpaca_open.mp3</a>
+              <p class="small"><b>Question (Audio)</b>: Hitung luas segitiga dengan panjang 15 dan lebar 30?</br><b>Model Prediction</b>: 
+                <pre><code style="overflow-x: auto;">
+Luas segitiga dengan panjang 15 dan lebar 30 adalah:
+
+Luas = (panjang × lebar) ÷ 2
+= (15 × 30) ÷ 2
+= 450 ÷ 2
+= 225 satuan persegi
+
+Jadi, luas segitiga tersebut adalah 225 satuan persegi.
+                </code></pre></p>
+              <p><b>MaJ Score: </b>5.0</br><b>MaJ Explanation:</b>The response correctly applies the triangle area formula and provides a clear, step-by-step calculation, directly answering the user's question.</p>
+            </div>
+          </div>
+          <div class="audio-item">
+            <div class="label">Sample 4 (Chinese)</div>
+            <audio controls preload="none">
+              <source src="audio/4_zh_alpacaeval_open.wav" type="audio/wav" />
+              Your browser does not support the audio element.
+            </audio>
+            <div class="small">Raw: <a href="audio/4_zh_alpacaeval_open.wav" target="_blank" rel="noopener">audio/4_zh_alpacaeval_open.wav</a>
+              <p class="small"><b>Question (Audio)</b>: 鲍勃有两个儿子。约翰和杰伊。杰伊有一个兄弟和父亲。父亲有两个儿子。杰伊的兄弟有一个兄弟和一个父亲。杰伊的兄弟是谁。</br><b>Model Prediction</b>: 
+                <pre><code style="overflow-x: auto;">
+让我们一步步分析这个问题：
+
+1. 父亲有两个儿子：约翰和杰伊
+2. 杰伊有一个兄弟：约翰
+3. 杰伊的兄弟（约翰）有一个兄弟：杰伊
+4. 因此，杰伊的兄弟是约翰
+
+所以，杰伊的兄弟是约翰。
+                </code></pre></p>
+              <p><b>MaJ Score: </b>5.0</br><b>MaJ Explanation:</b>The response clearly analyzes the relationships step by step and correctly concludes that Jay's brother is John. The explanation is accurate and concise.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section data-collapsed="true">
+        <div class="sec-meta">
+          <h2>References</h2>
+          <div class="sec-actions">
+            <button class="btn sec-toggle" type="button" aria-expanded="false">Expand</button>
+          </div>
+        </div>
+
+        <ol class="refs">
+          <li>
+            R. Ardila, M. Branson, K. Davis, M. Henretty, M. Kohler, J. Meyer, R. Morais, L. Saunders, F. M. Tyers, and G. Weber, “Common voice: A massively-multilingual speech corpus,” in Proc. LREC, 2020, pp. 4211–4215
+          </li>
+          <li>
+            R. Yan, X. Li et al., “URO-bench: Towards comprehensive evaluation for end-to-end spoken dialogue models,” Findings of the Association for Computational Linguistics: EMNLP 2025, 2025.
+          </li>
+          <li>
+            P. Lewis, B. O˘guz, R. Rinott, S. Riedel, and H. Schwenk, “Mlqa: Evaluating cross-lingual extractive question answering,” arXiv preprint arXiv:1910.07475, 2019.
+          </li>
+          <li>
+            B. Wang, X. Zou, G. Lin, S. Sun, Z. Liu, W. Zhang, Z. Liu, A. Aw, and N. F. Chen, “AudioBench: A universal benchmark for audio large language models,” in Proc. NAACL, 2025, pp. 4297–4316.
+          </li>
+        </ol>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    function slugify(t){
+      return (t || "")
+        .toLowerCase().trim()
+        .replace(/[^\w\s-]/g,"")
+        .replace(/\s+/g,"-")
+        .replace(/-+/g,"-");
+    }
+    function ensureId(el){
+      if(el.id) return el.id;
+      const base = slugify(el.textContent || "section");
+      let id = base, i = 2;
+      while(document.getElementById(id)) id = `${base}-${i++}`;
+      el.id = id;
+      return id;
+    }
+    function findSectionForHeading(h){
+      return h.closest("section");
+    }
+
+    function setSectionCollapsed(sec, collapsed){
+      const body = sec.querySelector(".section-body");
+      const btn = sec.querySelector(".sec-toggle");
+      if(!body || !btn) return;
+      body.style.display = collapsed ? "none" : "";
+      btn.textContent = collapsed ? "Expand" : "Collapse";
+      btn.setAttribute("aria-expanded", (!collapsed).toString());
+      sec.setAttribute("data-collapsed", collapsed ? "true" : "false");
+    }
+
+    function setupCollapsibles(){
+      const sections = Array.from(document.querySelectorAll("#content section"));
+      sections.forEach(sec => {
+        const collapsed = (sec.getAttribute("data-collapsed") || "").toLowerCase() === "true";
+
+        const meta = sec.querySelector(".sec-meta");
+        if(!meta) return;
+
+        const body = document.createElement("div");
+        body.className = "section-body";
+
+        let node = meta.nextSibling;
+        const move = [];
+        while(node){ move.push(node); node = node.nextSibling; }
+        move.forEach(n => body.appendChild(n));
+        sec.appendChild(body);
+
+        const btn = sec.querySelector(".sec-toggle");
+        if(btn){
+          btn.addEventListener("click", () => {
+            const isCollapsed = (sec.getAttribute("data-collapsed") || "false").toLowerCase() === "true";
+            setSectionCollapsed(sec, !isCollapsed);
+          });
+        }
+
+        setSectionCollapsed(sec, collapsed);
+      });
+    }
+    setupCollapsibles();
+
+    document.getElementById("expandAll").addEventListener("click", () => {
+      document.querySelectorAll("#content section").forEach(sec => setSectionCollapsed(sec, false));
+    });
+    document.getElementById("collapseAll").addEventListener("click", () => {
+      document.querySelectorAll("#content section").forEach(sec => setSectionCollapsed(sec, true));
+    });
+
+    const toc = document.getElementById("toc");
+    const headings = Array.from(document.querySelectorAll("#content h2, #content h3, #content h4"));
+
+    let c2=0, c3=0, c4=0;
+    const numbering = new Map();
+    headings.forEach(h => {
+      const tag = h.tagName.toLowerCase();
+      if(tag === "h2"){ c2++; c3=0; c4=0; numbering.set(h, `${c2}`); }
+      if(tag === "h3"){ c3++; c4=0; numbering.set(h, `${c2}.${c3}`); }
+      if(tag === "h4"){ c4++; numbering.set(h, `${c2}.${c3}.${c4}`); }
+    });
+
+    headings.forEach(h => {
+      const id = ensureId(h);
+
+      const a = document.createElement("a");
+      a.href = `#${id}`;
+
+      const tag = h.tagName.toLowerCase();
+      a.classList.add(tag === "h2" ? "lvl2" : tag === "h3" ? "lvl3" : "lvl4");
+
+      const txt = document.createElement("span");
+      txt.className = "txt";
+      txt.textContent = h.textContent;
+
+      a.appendChild(txt);
+
+      a.addEventListener("click", (e) => {
+        e.preventDefault();
+
+        const sec = findSectionForHeading(h);
+        if(sec){
+          setSectionCollapsed(sec, false);
+        }
+
+        requestAnimationFrame(() => {
+          document.getElementById(id).scrollIntoView({behavior:"smooth", block:"start"});
+          history.replaceState(null, "", `#${id}`);
+        });
+      });
+
+      const li = document.createElement("li");
+      li.appendChild(a);
+      toc.appendChild(li);
+    });
+
+    const tocLinks = Array.from(document.querySelectorAll(".toc a"));
+    const obs = new IntersectionObserver((entries) => {
+      const visible = entries
+        .filter(e => e.isIntersecting)
+        .sort((a,b) => a.boundingClientRect.top - b.boundingClientRect.top);
+      if(!visible.length) return;
+      const id = visible[0].target.id;
+      tocLinks.forEach(a => a.classList.toggle("active", a.getAttribute("href") === `#${id}`));
+    }, { rootMargin: "-25% 0px -70% 0px", threshold: [0, 1] });
+    headings.forEach(h => obs.observe(h));
+
+    function expandFromHash(){
+      const id = (location.hash || "").slice(1);
+      if(!id) return;
+      const target = document.getElementById(id);
+      if(!target) return;
+      const sec = target.closest("section");
+      if(sec) setSectionCollapsed(sec, false);
+      requestAnimationFrame(() => target.scrollIntoView({behavior:"auto", block:"start"}));
+    }
+    window.addEventListener("load", expandFromHash);
+  </script>
+</body>
+</html>
